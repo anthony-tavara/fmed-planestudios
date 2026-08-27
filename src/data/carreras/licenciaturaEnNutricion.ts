@@ -36,14 +36,14 @@ export const licenciaturaEnNutricion: Carrera = {
     {
       id: "fisica-e-introduccion-a-la-biofisica",
       nombre: "Física e Introducción a la Biofísica",
-      correlativas: ["matematica"],
+      correlativas: [],
       ciclo: 1,
       periodo: "cuatrimestral",
     },
     {
       id: "biologia-e-introduccion-a-la-biologia-celular",
       nombre: "Biología e Introducción a la Biología Celular",
-      correlativas: ["quimica"],
+      correlativas: [],
       ciclo: 1,
       periodo: "cuatrimestral",
     },
