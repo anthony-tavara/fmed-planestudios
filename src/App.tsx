@@ -7,6 +7,7 @@ import {
 import { carreras } from "./data/carreras/carreras-index";
 import {
   calcularEstadoMateria,
+  obtenerMateriaPorCarreraYId,
   type EstadoMateria,
 } from "./lib/materias/calcularEstadoMateria";
 import type { Materia } from "./data/carreras/types";
@@ -28,7 +29,7 @@ const ESTADO_CONFIG: Record<EstadoMateria, ConfigEstado> = {
   bloqueada: {
     icon: Lock,
     label: "Bloqueada",
-    card: "border-[#A9A28F]/40 bg-[#FBF9F4]/50 opacity-60",
+    card: "border-[#A9A28F]/40 bg-[#FBF9F4]/50 opacity-60 hover:border-[#A9A28F] hover:-translate-y-0.5 focus:-translate-y-0.5 focus:bg-[#A9A28F]",
     badge: "bg-[#A9A28F]/20 text-[#6B6656]",
   },
   disponible: {
@@ -53,6 +54,31 @@ export default function App() {
   const [carreraId, setCarreraId] = useState("");
   const carrera = carreraId ? obtenerCarreraPorId(carreraId) : undefined;
   const [aprobadas, setAprobadas] = useState(new Set<string>());
+  const [materiasIdResaltadas, setMateriasIdResaltadas] = useState<string[]>(
+    [],
+  );
+
+  function marcarCorrelativasDeMateria(materia: Materia) {
+    if (!carrera) return;
+
+    const correlativas: string[] = materia.correlativas;
+    const nuevasResaltadas: string[] = [];
+
+    for (const correlativaId of correlativas) {
+      const correlativaInfo = obtenerMateriaPorCarreraYId(
+        carrera,
+        correlativaId,
+      );
+
+      if (
+        correlativaInfo &&
+        calcularEstadoMateria(correlativaInfo, aprobadas) !== "aprobada"
+      )
+        nuevasResaltadas.push(correlativaId);
+    }
+
+    setMateriasIdResaltadas(nuevasResaltadas);
+  }
 
   function toggleAprobada(materia: Materia) {
     const estadoMateria = calcularEstadoMateria(materia, aprobadas);
@@ -144,13 +170,11 @@ export default function App() {
                 return (
                   <button
                     key={materia.id}
-                    onClick={() => toggleAprobada(materia)}
-                    disabled={estado === "bloqueada"}
-                    className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} ${
-                      estado === "bloqueada"
-                        ? "cursor-not-allowed"
-                        : "cursor-pointer"
-                    }`}
+                    onClick={() => {
+                      toggleAprobada(materia);
+                      marcarCorrelativasDeMateria(materia);
+                    }}
+                    className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer ${materiasIdResaltadas.find((materiaId) => materiaId === materia.id) && "bg-red-200"}`}
                   >
                     <span
                       className={`mb-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${config.badge}`}
