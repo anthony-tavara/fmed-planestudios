@@ -47,12 +47,6 @@ const ESTADO_CONFIG: Record<EstadoMateria, ConfigEstado> = {
   },
 };
 
-const ELECTIVA_TAG = {
-  label: "Electiva",
-  badge:
-    "border border-dashed border-[#7A4A5A]/50 bg-[#7A4A5A]/10 text-[#7A4A5A]",
-};
-
 function labelCiclo(ciclo: number) {
   if (ciclo === 0) return "Ciclo Básico Común";
 
@@ -111,16 +105,14 @@ export default function App() {
 
   if (carrera) {
     for (const materia of carrera.materias) {
-      if (materia.ciclo != 1) {
-        let ciclo = ciclos.find((ciclo) => ciclo.numeroCiclo === materia.ciclo);
+      let ciclo = ciclos.find((ciclo) => ciclo.numeroCiclo === materia.ciclo);
 
-        if (!ciclo) {
-          ciclo = { numeroCiclo: materia.ciclo, materias: [] };
-          ciclos.push(ciclo);
-        }
-
-        ciclo.materias.push(materia);
+      if (!ciclo) {
+        ciclo = { numeroCiclo: materia.ciclo, materias: [] };
+        ciclos.push(ciclo);
       }
+
+      ciclo.materias.push(materia);
     }
 
     ciclos.sort((a, b) => a.numeroCiclo - b.numeroCiclo);
@@ -210,8 +202,11 @@ export default function App() {
                   return (
                     <button
                       key={materia.id}
-                      onClick={() => toggleAprobada(materia)}
-                      className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer`}
+                      onClick={() => {
+                        toggleAprobada(materia);
+                        marcarCorrelativasDeMateria(materia);
+                      }}
+                      className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer ${materiasIdResaltadas.some((materiaId) => materiaId === materia.id) ? "bg-red-200" : ""}`}
                     >
                       <div className="mb-2 flex flex-wrap items-center gap-1.5">
                         <span
@@ -222,10 +217,8 @@ export default function App() {
                         </span>
 
                         {materia.electiva && (
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${ELECTIVA_TAG.badge}`}
-                          >
-                            {ELECTIVA_TAG.label}
+                          <span className="inline-flex items-center rounded-full border border-dashed border-[#7A4A5A]/50 bg-[#7A4A5A]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[#7A4A5A]">
+                            Electiva
                           </span>
                         )}
                       </div>
