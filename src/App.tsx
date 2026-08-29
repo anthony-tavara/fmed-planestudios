@@ -58,6 +58,7 @@ export default function App() {
   const [materiasIdResaltadas, setMateriasIdResaltadas] = useState<string[]>(
     [],
   );
+  const [modoMapa, setModoMapa] = useState(false);
 
   function marcarCorrelativasDeMateria(materia: Materia) {
     if (!carrera) return;
@@ -82,15 +83,17 @@ export default function App() {
   }
 
   function toggleAprobada(materia: Materia) {
-  setAprobadas((prev) => {
-    const estado = calcularEstadoMateria(materia, prev);
-    if (estado === "bloqueada") return prev; // no cambia nada
+    setAprobadas((prev) => {
+      const estado = calcularEstadoMateria(materia, prev);
+      if (estado === "bloqueada") return prev; // no cambia nada
 
-    const nuevoSet = new Set(prev);
-    nuevoSet.has(materia.id) ? nuevoSet.delete(materia.id) : nuevoSet.add(materia.id);
-    return nuevoSet;
-  });
-}
+      const nuevoSet = new Set(prev);
+      nuevoSet.has(materia.id)
+        ? nuevoSet.delete(materia.id)
+        : nuevoSet.add(materia.id);
+      return nuevoSet;
+    });
+  }
 
   const porcentaje = carrera
     ? calcularPorcentajeCarerraPorId(carreraId, aprobadas)
@@ -115,13 +118,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#EDE8DD] font-body text-[#1B2A4A]">
-
       <header className="mx-auto max-w-3xl px-6 pt-12 pb-8">
         <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-[#8A5D18]">
           FMED - Plan de estudios
         </p>
 
-        <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex flex-wrap items-center justify-between gap-6">
           <div>
             <select
               id="carrera-select"
@@ -141,6 +143,31 @@ export default function App() {
             </h1>
           </div>
 
+          {carrera != undefined && <div className="flex items-center gap-0.5 rounded-full border border-[#1B2A4A]/30 bg-[#FBF9F4] p-0.5 font-mono text-xs uppercase tracking-wide">
+            <button
+              onClick={() => setModoMapa(false)}
+              aria-pressed={!modoMapa}
+              className={`rounded-full px-3 py-1.5 transition-colors  ${
+                !modoMapa
+                  ? "bg-[#C98A2C]/50 text-[#FBF9F4]"
+                  : "text-[#1B2A4A]/60 cursor-pointer "
+              }`}
+            >
+              Lista
+            </button>
+            <button
+              onClick={() => setModoMapa(true)}
+              aria-pressed={modoMapa}
+              className={`rounded-full px-3 py-1.5 transition-colors ${
+                modoMapa
+                  ? "bg-[#C98A2C]/50 text-[#FBF9F4]"
+                  : "text-[#1B2A4A]/60 cursor-pointer"
+              }`}
+            >
+              Mapa
+            </button>
+          </div>}
+
           {porcentaje !== null && (
             <div className="flex h-20 w-20 shrink-0 -rotate-6 items-center justify-center rounded-full border-2 border-dashed border-[#3F6B4E] text-[#3F6B4E]">
               <span className="font-mono text-xl font-semibold">
@@ -151,55 +178,61 @@ export default function App() {
         </div>
       </header>
 
+      {!modoMapa && (
+        <main className="mx-auto max-w-3xl px-6 pb-16">
+          {ciclos.map(({ numeroCiclo, materias }) => (
+            <section key={numeroCiclo} className="mb-10">
+              <div className="mb-4 flex items-center gap-3">
+                <h2 className="font-display text-lg font-semibold">
+                  {labelCiclo(numeroCiclo)}
+                </h2>
+                <div className="h-px flex-1 bg-[#1B2A4A]/15" />
+              </div>
 
-      <main className="mx-auto max-w-3xl px-6 pb-16">
-        {ciclos.map(({ numeroCiclo, materias }) => (
-          <section key={numeroCiclo} className="mb-10">
-            <div className="mb-4 flex items-center gap-3">
-              <h2 className="font-display text-lg font-semibold">
-                {labelCiclo(numeroCiclo)}
-              </h2>
-              <div className="h-px flex-1 bg-[#1B2A4A]/15" />
-            </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {materias.map((materia) => {
+                  const estado = calcularEstadoMateria(materia, aprobadas);
+                  const config = ESTADO_CONFIG[estado];
+                  const Icon = config.icon;
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {materias.map((materia) => {
-                const estado = calcularEstadoMateria(materia, aprobadas);
-                const config = ESTADO_CONFIG[estado];
-                const Icon = config.icon;
-
-                return (
-                  
-                  <button
-                    key={materia.id}
-                    onClick={() => {
-                      toggleAprobada(materia);
-                      marcarCorrelativasDeMateria(materia);
-                    }}
-                    className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer ${materiasIdResaltadas.find((materiaId) => materiaId === materia.id) && "bg-red-200"}`}
-                  >
-                    <span
-                      className={`mb-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${config.badge}`}
+                  return (
+                    <button
+                      key={materia.id}
+                      onClick={() => {
+                        toggleAprobada(materia);
+                        marcarCorrelativasDeMateria(materia);
+                      }}
+                      className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer ${materiasIdResaltadas.find((materiaId) => materiaId === materia.id) && "bg-red-200"}`}
                     >
-                      <Icon size={11} strokeWidth={2.5} />
-                      {config.label}
-                    </span>
-                    <p className="font-body text-sm leading-snug">
-                      {materia.nombre}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        ))}
+                      <span
+                        className={`mb-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${config.badge}`}
+                      >
+                        <Icon size={11} strokeWidth={2.5} />
+                        {config.label}
+                      </span>
+                      <p className="font-body text-sm leading-snug">
+                        {materia.nombre}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </main>
+      )}
 
-      </main>
-
-      <div className="mx-auto max-w-7xl px-6 pb-16">
-          {carrera && <MapaCarrera carrera={carrera} aprobadas={aprobadas} onToggleMateria={toggleAprobada} />}
-      </div>
-
+      {modoMapa && (
+        <div className="mx-auto max-w-7xl px-6 pb-16">
+          {carrera && (
+            <MapaCarrera
+              carrera={carrera}
+              aprobadas={aprobadas}
+              onToggleMateria={toggleAprobada}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
