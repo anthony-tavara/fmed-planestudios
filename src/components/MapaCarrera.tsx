@@ -1,7 +1,10 @@
 import { useMemo, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import type { Carrera, Materia } from "../data/carreras/types";
-import { calcularPosiciones, materiasAGrafo } from "../lib/materias/materiasAGrafo";
+import {
+  calcularPosiciones,
+  materiasAGrafo,
+} from "../lib/materias/materiasAGrafo";
 import type { EstadoMateria } from "../lib/materias/calcularEstadoMateria";
 
 interface Props {
@@ -15,8 +18,6 @@ interface ConfigEstado {
   bordercolor: string;
   textcolor: string;
   label: string;
-  card: string;
-  badge: string;
 }
 
 const ESTADO_CONFIG: Record<EstadoMateria, ConfigEstado> = {
@@ -25,31 +26,25 @@ const ESTADO_CONFIG: Record<EstadoMateria, ConfigEstado> = {
     bordercolor: "#D6D1C5",
     textcolor: "#6B6656",
     label: "Bloqueada",
-    card: "border-[#A9A28F]/40 bg-[#FBF9F4]/50 opacity-60 hover:border-[#A9A28F] hover:-translate-y-0.5 focus:-translate-y-0.5 focus:bg-[#A9A28F]",
-    badge: "bg-[#A9A28F]/20 text-[#6B6656]",
   },
   disponible: {
     bgcolor: "#FBF9F4",
     bordercolor: "#E2C290",
     textcolor: "#8A5D18",
     label: "Disponible",
-    card: "border-[#C98A2C]/50 bg-[#FBF9F4] hover:border-[#C98A2C] hover:-translate-y-0.5",
-    badge: "bg-[#C98A2C]/15 text-[#8A5D18]",
   },
   aprobada: {
     bgcolor: "#ECEEE7",
     bordercolor: "#B9C7BA",
     textcolor: "#2E4F39",
     label: "Aprobada",
-    card: "border-[#3F6B4E]/50 bg-[#3F6B4E]/[0.06] hover:-translate-y-0.5",
-    badge: "bg-[#3F6B4E]/15 text-[#2E4F39]",
   },
 };
 
 export function MapaCarrera({ carrera, aprobadas, onToggleMateria }: Props) {
   const materiasSinElectivas: Materia[] = useMemo(
     () => carrera.materias.filter((materia) => !materia.electiva),
-    [carrera]
+    [carrera],
   );
 
   const onToggleRef = useRef(onToggleMateria);
@@ -58,7 +53,10 @@ export function MapaCarrera({ carrera, aprobadas, onToggleMateria }: Props) {
   materiasRef.current = materiasSinElectivas;
 
   const elements = materiasAGrafo(materiasSinElectivas, aprobadas);
-  const posiciones = useMemo(() => calcularPosiciones(materiasSinElectivas), [materiasSinElectivas]);
+  const posiciones = useMemo(
+    () => calcularPosiciones(materiasSinElectivas),
+    [materiasSinElectivas],
+  );
 
   const layout = useMemo(
     () => ({
@@ -66,7 +64,7 @@ export function MapaCarrera({ carrera, aprobadas, onToggleMateria }: Props) {
       positions: (node: any) => posiciones[node.id()],
       fit: false,
     }),
-    [posiciones]
+    [posiciones],
   );
 
   return (
@@ -78,22 +76,45 @@ export function MapaCarrera({ carrera, aprobadas, onToggleMateria }: Props) {
         {
           selector: "node",
           style: {
-            opacity: (ele: any) => (ele.data("estado") === "bloqueada" ? 0.6 : 1),
             "border-style": "solid",
             "border-width": "1px",
-            "border-color": (ele: any) => ESTADO_CONFIG[ele.data("estado")].bordercolor,
-            "background-color": (ele: any) => ESTADO_CONFIG[ele.data("estado")].bgcolor,
             label: "data(label)",
             "text-valign": "center",
             "text-halign": "center",
             "font-size": 10,
-            color: (ele: any) => ESTADO_CONFIG[ele.data("estado")].textcolor,
             width: 90,
             height: 60,
-            shape: 'roundrectangle',
+            shape: "roundrectangle",
             "text-wrap": "wrap",
             "text-max-width": "80",
             "overlay-opacity": 0,
+          },
+        },
+        {
+          selector: 'node[estado = "bloqueada"]',
+          style: {
+            opacity: 0.6,
+            "border-color": ESTADO_CONFIG.bloqueada.bordercolor,
+            "background-color": ESTADO_CONFIG.bloqueada.bgcolor,
+            color: ESTADO_CONFIG.bloqueada.textcolor,
+          },
+        },
+        {
+          selector: 'node[estado = "disponible"]',
+          style: {
+            opacity: 1,
+            "border-color": ESTADO_CONFIG.disponible.bordercolor,
+            "background-color": ESTADO_CONFIG.disponible.bgcolor,
+            color: ESTADO_CONFIG.disponible.textcolor,
+          },
+        },
+        {
+          selector: 'node[estado = "aprobada"]',
+          style: {
+            opacity: 1,
+            "border-color": ESTADO_CONFIG.aprobada.bordercolor,
+            "background-color": ESTADO_CONFIG.aprobada.bgcolor,
+            color: ESTADO_CONFIG.aprobada.textcolor,
           },
         },
         {
