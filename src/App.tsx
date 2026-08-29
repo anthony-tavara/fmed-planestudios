@@ -47,6 +47,12 @@ const ESTADO_CONFIG: Record<EstadoMateria, ConfigEstado> = {
   },
 };
 
+const ELECTIVA_TAG = {
+  label: "Electiva",
+  badge:
+    "border border-dashed border-[#7A4A5A]/50 bg-[#7A4A5A]/10 text-[#7A4A5A]",
+};
+
 function labelCiclo(ciclo: number) {
   if (ciclo === 0) return "Ciclo Básico Común";
 
@@ -204,18 +210,26 @@ export default function App() {
                   return (
                     <button
                       key={materia.id}
-                      onClick={() => {
-                        toggleAprobada(materia);
-                        marcarCorrelativasDeMateria(materia);
-                      }}
-                      className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer ${materiasIdResaltadas.find((materiaId) => materiaId === materia.id) && "bg-red-200"}`}
+                      onClick={() => toggleAprobada(materia)}
+                      className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer`}
                     >
-                      <span
-                        className={`mb-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${config.badge}`}
-                      >
-                        <Icon size={11} strokeWidth={2.5} />
-                        {config.label}
-                      </span>
+                      <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${config.badge}`}
+                        >
+                          <Icon size={11} strokeWidth={2.5} />
+                          {config.label}
+                        </span>
+
+                        {materia.electiva && (
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${ELECTIVA_TAG.badge}`}
+                          >
+                            {ELECTIVA_TAG.label}
+                          </span>
+                        )}
+                      </div>
+
                       <p className="font-body text-sm leading-snug">
                         {materia.nombre}
                       </p>
