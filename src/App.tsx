@@ -12,6 +12,7 @@ import {
 } from "./lib/materias/calcularEstadoMateria";
 import type { Materia } from "./data/carreras/types";
 import { Lock, CircleDashed, CircleCheck, type LucideIcon } from "lucide-react";
+import { MapaCarrera } from "./components/MapaCarrera";
 
 interface Ciclo {
   numeroCiclo: number;
@@ -81,17 +82,15 @@ export default function App() {
   }
 
   function toggleAprobada(materia: Materia) {
-    const estadoMateria = calcularEstadoMateria(materia, aprobadas);
-    if (estadoMateria === "bloqueada") return;
+  setAprobadas((prev) => {
+    const estado = calcularEstadoMateria(materia, prev);
+    if (estado === "bloqueada") return prev; // no cambia nada
 
-    setAprobadas((prev) => {
-      const nuevoSet = new Set(prev);
-      nuevoSet.has(materia.id)
-        ? nuevoSet.delete(materia.id)
-        : nuevoSet.add(materia.id);
-      return nuevoSet;
-    });
-  }
+    const nuevoSet = new Set(prev);
+    nuevoSet.has(materia.id) ? nuevoSet.delete(materia.id) : nuevoSet.add(materia.id);
+    return nuevoSet;
+  });
+}
 
   const porcentaje = carrera
     ? calcularPorcentajeCarerraPorId(carreraId, aprobadas)
@@ -116,6 +115,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#EDE8DD] font-body text-[#1B2A4A]">
+
       <header className="mx-auto max-w-3xl px-6 pt-12 pb-8">
         <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-[#8A5D18]">
           FMED - Plan de estudios
@@ -151,6 +151,7 @@ export default function App() {
         </div>
       </header>
 
+
       <main className="mx-auto max-w-3xl px-6 pb-16">
         {ciclos.map(({ numeroCiclo, materias }) => (
           <section key={numeroCiclo} className="mb-10">
@@ -168,6 +169,7 @@ export default function App() {
                 const Icon = config.icon;
 
                 return (
+                  
                   <button
                     key={materia.id}
                     onClick={() => {
@@ -191,7 +193,13 @@ export default function App() {
             </div>
           </section>
         ))}
+
       </main>
+
+      <div className="mx-auto max-w-7xl px-6 pb-16">
+          {carrera && <MapaCarrera carrera={carrera} aprobadas={aprobadas} onToggleMateria={toggleAprobada} />}
+      </div>
+
     </div>
   );
 }
