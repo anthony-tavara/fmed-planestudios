@@ -48,7 +48,9 @@ const ESTADO_CONFIG: Record<EstadoMateria, ConfigEstado> = {
 };
 
 function labelCiclo(ciclo: number) {
-  return ciclo === 1 ? "Ciclo Básico Común" : `${ciclo}° año`;
+  if (ciclo === 0) return "Ciclo Básico Común";
+
+  return `${ciclo}° año`;
 }
 
 export default function App() {
@@ -103,14 +105,16 @@ export default function App() {
 
   if (carrera) {
     for (const materia of carrera.materias) {
-      let ciclo = ciclos.find((ciclo) => ciclo.numeroCiclo === materia.ciclo);
+      if (materia.ciclo != 1) {
+        let ciclo = ciclos.find((ciclo) => ciclo.numeroCiclo === materia.ciclo);
 
-      if (!ciclo) {
-        ciclo = { numeroCiclo: materia.ciclo, materias: [] };
-        ciclos.push(ciclo);
+        if (!ciclo) {
+          ciclo = { numeroCiclo: materia.ciclo, materias: [] };
+          ciclos.push(ciclo);
+        }
+
+        ciclo.materias.push(materia);
       }
-
-      ciclo.materias.push(materia);
     }
 
     ciclos.sort((a, b) => a.numeroCiclo - b.numeroCiclo);
@@ -143,30 +147,32 @@ export default function App() {
             </h1>
           </div>
 
-          {carrera != undefined && <div className="flex items-center gap-0.5 rounded-full border border-[#1B2A4A]/30 bg-[#FBF9F4] p-0.5 font-mono text-xs uppercase tracking-wide">
-            <button
-              onClick={() => setModoMapa(false)}
-              aria-pressed={!modoMapa}
-              className={`rounded-full px-3 py-1.5 transition-colors  ${
-                !modoMapa
-                  ? "bg-[#C98A2C]/50 text-[#FBF9F4]"
-                  : "text-[#1B2A4A]/60 cursor-pointer "
-              }`}
-            >
-              Lista
-            </button>
-            <button
-              onClick={() => setModoMapa(true)}
-              aria-pressed={modoMapa}
-              className={`rounded-full px-3 py-1.5 transition-colors ${
-                modoMapa
-                  ? "bg-[#C98A2C]/50 text-[#FBF9F4]"
-                  : "text-[#1B2A4A]/60 cursor-pointer"
-              }`}
-            >
-              Mapa
-            </button>
-          </div>}
+          {carrera != undefined && (
+            <div className="flex items-center gap-0.5 rounded-full border border-[#1B2A4A]/30 bg-[#FBF9F4] p-0.5 font-mono text-xs uppercase tracking-wide">
+              <button
+                onClick={() => setModoMapa(false)}
+                aria-pressed={!modoMapa}
+                className={`rounded-full px-3 py-1.5 transition-colors  ${
+                  !modoMapa
+                    ? "bg-[#C98A2C]/50 text-[#FBF9F4]"
+                    : "text-[#1B2A4A]/60 cursor-pointer "
+                }`}
+              >
+                Lista
+              </button>
+              <button
+                onClick={() => setModoMapa(true)}
+                aria-pressed={modoMapa}
+                className={`rounded-full px-3 py-1.5 transition-colors ${
+                  modoMapa
+                    ? "bg-[#C98A2C]/50 text-[#FBF9F4]"
+                    : "text-[#1B2A4A]/60 cursor-pointer"
+                }`}
+              >
+                Mapa
+              </button>
+            </div>
+          )}
 
           {porcentaje !== null && (
             <div className="flex h-20 w-20 shrink-0 -rotate-6 items-center justify-center rounded-full border-2 border-dashed border-[#3F6B4E] text-[#3F6B4E]">
