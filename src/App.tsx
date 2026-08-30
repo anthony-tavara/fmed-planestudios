@@ -221,6 +221,12 @@ export default function App() {
                             Electiva
                           </span>
                         )}
+
+                        {materia.periodo === "anual" && (
+                          <span className="inline-flex items-center rounded-full bg-[#1B2A4A]/[0.06] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[#1B2A4A]/60">
+                            Anual
+                          </span>
+                        )}
                       </div>
 
                       <p className="font-body text-sm leading-snug">
