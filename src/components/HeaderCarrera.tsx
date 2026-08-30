@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
 import type { Carrera } from "../data/carreras/types";
 import { carreras } from "../data/carreras/carreras-index";
 import { calcularPorcentajeCarerraPorId } from "../lib/carreras/obtenerCarreraPorId";
-import type { Dispatch, SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { Link } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 
 interface HeaderCarreraProps {
   carrera: Carrera | undefined;
@@ -11,7 +12,13 @@ interface HeaderCarreraProps {
   setModoMapa: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function HeaderCarrera({ carrera, modoMapa, aprobadas, setModoMapa} : HeaderCarreraProps) {
+export default function HeaderCarrera({
+  carrera,
+  modoMapa,
+  aprobadas,
+  setModoMapa,
+}: HeaderCarreraProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const porcentaje = carrera
     ? calcularPorcentajeCarerraPorId(carrera.id, aprobadas)
     : null;
@@ -22,20 +29,34 @@ export default function HeaderCarrera({ carrera, modoMapa, aprobadas, setModoMap
       </p>
 
       <div className="flex flex-wrap items-center justify-between gap-8">
-        <div className="flex flex-wrap items-center gap-2">
-          {carreras.map((c) => (
-            <Link
-              to={`/${c.id}`}
-              key={c.id}
-              className="bg-[#FBF9F4] p-1 rounded"
-            >
-              {c.nombre}
-            </Link>
-          ))}
+        <div className="relative w-full max-w-xs">
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex w-full items-center justify-between rounded-lg border border-[#8A5D18]/30 bg-[#FBF9F4] px-4 py-2.5 text-left text-sm font-medium text-[#1B2A4A] shadow-sm transition-all hover:border-[#8A5D18]"
+          >
+            <div className="flex w-full justify-between gap-2 items-center">
+              <span className="w-full">
+                {carrera?.nombre ?? "Seleccioná una carrera..."}
+              </span>
+              <ChevronDown />
+            </div>
+          </button>
 
-          <h1 className="font-display text-3xl font-semibold leading-tight text-[#1B2A4A]">
-            {carrera ? carrera.nombre : ""}
-          </h1>
+          {isOpen && (
+            <div className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-lg border border-[#8A5D18]/20 bg-[#FBF9F4] py-1 shadow-lg">
+              {carreras.map((c) => (
+                <Link
+                  key={c.id}
+                  to={`/${c.id}`}
+                  onClick={() => setIsOpen(false)}
+                  className="block w-full px-4 py-2 text-left text-sm text-[#1B2A4A] transition-colors hover:bg-[#8A5D18]/10"
+                >
+                  {c.nombre}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {carrera != undefined && (
