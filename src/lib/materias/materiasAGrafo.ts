@@ -7,6 +7,7 @@ export function materiasAGrafo(materias: Materia[], aprobadas: Set<string>) {
       id: materia.id,
       label: materia.nombre,
       estado: calcularEstadoMateria(materia, aprobadas),
+      electiva: materia.electiva ?? false,
     },
   }));
 
