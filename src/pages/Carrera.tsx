@@ -141,7 +141,7 @@ export default function SelectorDeCarrera() {
   return (
     <div className="min-h-screen bg-[#EDE8DD] font-body text-[#1B2A4A]">
       <HeaderCarrera
-        carrera={carrera}
+        carrera={carrera ?? undefined}
         modoMapa={modoMapa}
         aprobadas={aprobadas}
         setModoMapa={setModoMapa}
