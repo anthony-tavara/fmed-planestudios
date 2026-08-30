@@ -1,9 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../App.css";
-import {
-  calcularPorcentajeCarerraPorId,
-  obtenerCarreraPorId,
-} from "../lib/carreras/obtenerCarreraPorId";
+import { obtenerCarreraPorId } from "../lib/carreras/obtenerCarreraPorId";
 import {
   calcularEstadoMateria,
   obtenerMateriaPorCarreraYId,
@@ -12,7 +9,7 @@ import {
 import type { Materia } from "../data/carreras/types";
 import { Lock, CircleDashed, CircleCheck, type LucideIcon } from "lucide-react";
 import { MapaCarrera } from "../components/MapaCarrera";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import HeaderCarrera from "../components/HeaderCarrera";
 
 interface Ciclo {
@@ -56,9 +53,34 @@ function labelCiclo(ciclo: number) {
 
 export default function SelectorDeCarrera() {
   const { carreraId } = useParams();
-  /* const [carreraId, setCarreraId] = useState(""); */
   const carrera = carreraId ? obtenerCarreraPorId(carreraId) : undefined;
-  const [aprobadas, setAprobadas] = useState(new Set<string>());
+  const [aprobadas, setAprobadas] = useState<Set<string>>(new Set<string>());
+
+  useEffect(() => {
+    if (!carreraId) {
+      setAprobadas(new Set());
+      return;
+    }
+
+    const localMateriasAprobadas = localStorage.getItem(carreraId);
+    if (!localMateriasAprobadas) {
+      setAprobadas(new Set());
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(localMateriasAprobadas);
+      setAprobadas(new Set<string>(parsed));
+    } catch {
+      setAprobadas(new Set());
+    }
+  }, [carreraId]);
+
+  useEffect(() => {
+    if (!carreraId) return;
+    localStorage.setItem(carreraId, JSON.stringify([...aprobadas]));
+  }, [carreraId, aprobadas]);
+
   const [materiasIdResaltadas, setMateriasIdResaltadas] = useState<string[]>(
     [],
   );
