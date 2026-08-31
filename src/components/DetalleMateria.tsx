@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from "react";
 
 interface DetalleMateriaProps {
   materia: Materia;
-  setMateriaDetalle: Dispatch<SetStateAction<Materia>>;
+  setMateriaDetalle: Dispatch<SetStateAction<Materia | null>>;
 }
 
 export default function DetalleMateria({

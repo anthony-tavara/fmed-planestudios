@@ -12,7 +12,6 @@ import {
   CircleDashed,
   CircleCheck,
   Info,
-  X,
   type LucideIcon,
 } from "lucide-react";
 import { MapaCarrera } from "../components/MapaCarrera";
