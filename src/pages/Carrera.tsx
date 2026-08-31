@@ -7,10 +7,18 @@ import {
   type EstadoMateria,
 } from "../lib/materias/calcularEstadoMateria";
 import type { Materia } from "../data/carreras/types";
-import { Lock, CircleDashed, CircleCheck, type LucideIcon } from "lucide-react";
+import {
+  Lock,
+  CircleDashed,
+  CircleCheck,
+  Info,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { MapaCarrera } from "../components/MapaCarrera";
 import { useParams } from "react-router-dom";
 import HeaderCarrera from "../components/HeaderCarrera";
+import DetalleMateria from "../components/DetalleMateria";
 
 interface Ciclo {
   numeroCiclo: number;
@@ -47,7 +55,6 @@ const ESTADO_CONFIG: Record<EstadoMateria, ConfigEstado> = {
 
 function labelCiclo(ciclo: number) {
   if (ciclo === 0) return "Ciclo Básico Común";
-
   return `${ciclo}° año`;
 }
 
@@ -55,6 +62,7 @@ export default function SelectorDeCarrera() {
   const { carreraId } = useParams();
   const carrera = carreraId ? obtenerCarreraPorId(carreraId) : undefined;
   const [aprobadas, setAprobadas] = useState<Set<string>>(new Set<string>());
+  const [materiaDetalle, setMateriaDetalle] = useState<Materia | null>(null);
 
   useEffect(() => {
     if (!carreraId) {
@@ -171,26 +179,48 @@ export default function SelectorDeCarrera() {
                         toggleAprobada(materia);
                         marcarCorrelativasDeMateria(materia);
                       }}
-                      className={`relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer ${materiasIdResaltadas.some((materiaId) => materiaId === materia.id) ? "bg-red-200" : ""}`}
+                      className={`group relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer ${
+                        materiasIdResaltadas.some(
+                          (materiaId) => materiaId === materia.id,
+                        )
+                          ? "bg-red-200"
+                          : ""
+                      }`}
                     >
-                      <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${config.badge}`}
-                        >
-                          <Icon size={11} strokeWidth={2.5} />
-                          {config.label}
-                        </span>
-
-                        {materia.electiva && (
-                          <span className="inline-flex items-center rounded-full border border-dashed border-[#7A4A5A]/50 bg-[#7A4A5A]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[#7A4A5A]">
-                            Electiva
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-1.5">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${config.badge}`}
+                          >
+                            <Icon size={11} strokeWidth={2.5} />
+                            {config.label}
                           </span>
-                        )}
 
-                        {materia.periodo === "anual" && (
-                          <span className="inline-flex items-center rounded-full bg-[#1B2A4A]/[0.06] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[#1B2A4A]/60">
-                            Anual
-                          </span>
+                          {materia.electiva && (
+                            <span className="inline-flex items-center rounded-full border border-dashed border-[#7A4A5A]/50 bg-[#7A4A5A]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[#7A4A5A]">
+                              Electiva
+                            </span>
+                          )}
+
+                          {materia.periodo === "anual" && (
+                            <span className="inline-flex items-center rounded-full bg-[#1B2A4A]/[0.06] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[#1B2A4A]/60">
+                              Anual
+                            </span>
+                          )}
+                        </div>
+
+                        {materia.correlativasTexto && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMateriaDetalle(materia);
+                            }}
+                            title="Ver correlativas"
+                            className="rounded-full p-1 text-[#1B2A4A]/40 transition-colors hover:bg-[#8A5D18]/15 hover:text-[#8A5D18]"
+                          >
+                            <Info size={20} />
+                          </button>
                         )}
                       </div>
 
@@ -216,6 +246,13 @@ export default function SelectorDeCarrera() {
             />
           )}
         </div>
+      )}
+
+      {materiaDetalle && (
+        <DetalleMateria
+          materia={materiaDetalle}
+          setMateriaDetalle={setMateriaDetalle}
+        />
       )}
     </div>
   );
