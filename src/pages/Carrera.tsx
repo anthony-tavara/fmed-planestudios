@@ -70,9 +70,8 @@ function toggleAprobada(
   return nuevoSet;
 }
 
-function labelCiclo(ciclo: number) {
-  if (ciclo === 0) return "Ciclo Básico Común";
-  return `${ciclo}° año`;
+function labelCiclo(carrera: Carrera, ciclo: number) {
+  return carrera.nombresCiclos?.[ciclo] ?? `${ciclo}° año`;
 }
 
 function marcarCorrelativasDeMateria(
@@ -151,7 +150,7 @@ export default function SelectorDeCarrera() {
             <section key={numeroCiclo} className="mb-10">
               <div className="mb-4 flex items-center gap-3">
                 <h2 className="font-display text-lg font-semibold">
-                  {labelCiclo(numeroCiclo)}
+                  {labelCiclo(carrera, numeroCiclo)}
                 </h2>
                 <div className="h-px flex-1 bg-[#1B2A4A]/15" />
               </div>

@@ -2,6 +2,7 @@ export interface Carrera {
   id: string;
   nombre: string;
   materias: Materia[];
+  nombresCiclos?: Record<number, string>; // opcional, si no está usa fallback genérico
 }
 
 export interface Materia {
