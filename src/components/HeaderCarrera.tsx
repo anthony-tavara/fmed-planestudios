@@ -1,6 +1,6 @@
 import type { Carrera } from "../data/carreras/types";
 import { carreras } from "../data/carreras/carreras-index";
-import { calcularPorcentajeCarerraPorId } from "../lib/carreras/obtenerCarreraPorId";
+import { calcularPorcentajeCarerraPorId } from "../lib/carreras/carreras";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
