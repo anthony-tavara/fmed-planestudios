@@ -61,6 +61,7 @@ export const licenciaturaEnNutricion: Carrera = {
       ],
       ciclo: 1,
       periodo: "cuatrimestral",
+      esAgrupador: true,
     },
 
     // ---------- 2do año ----------
@@ -437,4 +438,11 @@ export const licenciaturaEnNutricion: Carrera = {
       electiva: true,
     },
   ],
+  nombresCiclos: {
+    0: "Ciclo Básico Común",
+    2: "2° año",
+    3: "3° año",
+    4: "4° año",
+    5: "5° año",
+  },
 };
