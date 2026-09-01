@@ -12,6 +12,7 @@ export interface Materia {
   correlativasTexto?: string;
   ciclo: number;
   periodo: "1c" | "2c" | "cuatrimestral" | "anual";
+  cuatrimestre?: 1 | 2;
   electiva?: boolean;
   esAgrupador?: boolean;
 }
