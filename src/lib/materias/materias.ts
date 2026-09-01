@@ -41,8 +41,11 @@ export function obtenerCorrelativas(
 
   for (const correlativa of materia.correlativas) {
     const correlativaInfo = obtenerMateriaPorCarreraYId(carrera, correlativa);
-    if (correlativaInfo?.esAgrupador)
-      obtenerCorrelativas(carrera, correlativaInfo, correlativas);
-    else correlativas.push(correlativaInfo);
+
+    if (correlativaInfo) {
+      if (correlativaInfo.esAgrupador)
+        obtenerCorrelativas(carrera, correlativaInfo, correlativas);
+      else correlativas.push(correlativaInfo);
+    }
   }
 }

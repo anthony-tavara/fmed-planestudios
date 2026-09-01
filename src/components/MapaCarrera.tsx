@@ -2,11 +2,8 @@ import type { Core } from "cytoscape";
 import { useMemo, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import type { Carrera, Materia } from "../data/carreras/types";
-import {
-  calcularPosiciones,
-  materiasAGrafo,
-} from "../lib/materias/materiasAGrafo";
-import type { EstadoMateria } from "../lib/materias/calcularEstadoMateria";
+import { calcularPosiciones, materiasAGrafo } from "../lib/materias/grafo";
+import type { EstadoMateria } from "../lib/materias/materias";
 
 interface Props {
   carrera: Carrera;
@@ -51,7 +48,7 @@ export function MapaCarrera({ carrera, aprobadas, onToggleMateria }: Props) {
   const materiasRef = useRef(materiasSinElectivas);
   materiasRef.current = materiasSinElectivas;
 
-  const elements = materiasAGrafo(materiasSinElectivas, aprobadas);
+  const elements = materiasAGrafo(carrera, materiasSinElectivas, aprobadas);
   const posiciones = useMemo(
     () => calcularPosiciones(materiasSinElectivas),
     [materiasSinElectivas],

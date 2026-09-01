@@ -7,7 +7,6 @@ import {
 import {
   calcularEstadoMateria,
   obtenerCorrelativas,
-  obtenerMateriaPorCarreraYId,
   type EstadoMateria,
 } from "../lib/materias/materias";
 import type { Carrera, Materia } from "../data/carreras/types";
@@ -55,6 +54,21 @@ const ESTADO_CONFIG: Record<EstadoMateria, ConfigEstado> = {
     badge: "bg-[#3F6B4E]/15 text-[#2E4F39]",
   },
 };
+
+function toggleAprobada(
+  carrera: Carrera,
+  materia: Materia,
+  aprobadas: Set<string>,
+) {
+  const estado = calcularEstadoMateria(carrera, materia, aprobadas);
+  if (estado === "bloqueada") return aprobadas;
+
+  const nuevoSet = new Set(aprobadas);
+  nuevoSet.has(materia.id)
+    ? nuevoSet.delete(materia.id)
+    : nuevoSet.add(materia.id);
+  return nuevoSet;
+}
 
 function labelCiclo(ciclo: number) {
   if (ciclo === 0) return "Ciclo Básico Común";
@@ -116,17 +130,8 @@ export default function SelectorDeCarrera() {
   );
   const [modoMapa, setModoMapa] = useState(false);
 
-  function toggleAprobada(materia: Materia) {
-    setAprobadas((prev) => {
-      const estado = calcularEstadoMateria(carrera, materia, prev);
-      if (estado === "bloqueada") return prev;
-
-      const nuevoSet = new Set(prev);
-      nuevoSet.has(materia.id)
-        ? nuevoSet.delete(materia.id)
-        : nuevoSet.add(materia.id);
-      return nuevoSet;
-    });
+  if (!carrera) {
+    return <div>Carrera no encontrada</div>;
   }
 
   const ciclos: Ciclo[] = separarCarreraEnCiclos(carrera);
@@ -134,7 +139,7 @@ export default function SelectorDeCarrera() {
   return (
     <div className="min-h-screen bg-[#EDE8DD] font-body text-[#1B2A4A]">
       <HeaderCarrera
-        carrera={carrera ?? undefined}
+        carrera={carrera}
         modoMapa={modoMapa}
         aprobadas={aprobadas}
         setModoMapa={setModoMapa}
@@ -165,11 +170,16 @@ export default function SelectorDeCarrera() {
                     <button
                       key={materia.id}
                       onClick={() => {
-                        toggleAprobada(materia);
-                        marcarCorrelativasDeMateria(
+                        const nuevasAprobadas = toggleAprobada(
                           carrera,
                           materia,
                           aprobadas,
+                        );
+                        setAprobadas(nuevasAprobadas);
+                        marcarCorrelativasDeMateria(
+                          carrera,
+                          materia,
+                          nuevasAprobadas,
                           setMateriasIdResaltadas,
                         );
                       }}
@@ -232,13 +242,18 @@ export default function SelectorDeCarrera() {
 
       {modoMapa && (
         <div className="mx-auto px-6 pb-16">
-          {carrera && (
-            <MapaCarrera
-              carrera={carrera}
-              aprobadas={aprobadas}
-              onToggleMateria={toggleAprobada}
-            />
-          )}
+          <MapaCarrera
+            carrera={carrera}
+            aprobadas={aprobadas}
+            onToggleMateria={(materia) => {
+              const nuevasAprobadas = toggleAprobada(
+                carrera,
+                materia,
+                aprobadas,
+              );
+              setAprobadas(nuevasAprobadas);
+            }}
+          />
         </div>
       )}
 
