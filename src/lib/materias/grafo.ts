@@ -1,12 +1,16 @@
-import type { Materia } from "../../data/carreras/types";
-import { calcularEstadoMateria } from "./calcularEstadoMateria";
+import type { Carrera, Materia } from "../../data/carreras/types";
+import { calcularEstadoMateria } from "./materias";
 
-export function materiasAGrafo(materias: Materia[], aprobadas: Set<string>) {
+export function materiasAGrafo(
+  carrera: Carrera,
+  materias: Materia[],
+  aprobadas: Set<string>,
+) {
   const nodos = materias.map((materia) => ({
     data: {
       id: materia.id,
       label: materia.nombre,
-      estado: calcularEstadoMateria(materia, aprobadas),
+      estado: calcularEstadoMateria(carrera, materia, aprobadas),
       electiva: materia.electiva ?? false,
     },
   }));
@@ -53,7 +57,9 @@ export function calcularPosiciones(materias: Materia[]) {
       };
     });
 
-    const subColumnasUsadas = Math.ceil(materiasDelCiclo.length / MAX_POR_COLUMNA);
+    const subColumnasUsadas = Math.ceil(
+      materiasDelCiclo.length / MAX_POR_COLUMNA,
+    );
     xAcumulado += subColumnasUsadas * ANCHO_SUBCOLUMNA;
   });
 

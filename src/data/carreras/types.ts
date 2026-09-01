@@ -12,4 +12,5 @@ export interface Materia {
   ciclo: number;
   periodo: "1c" | "2c" | "cuatrimestral" | "anual";
   electiva?: boolean;
+  esAgrupador?: boolean;
 }

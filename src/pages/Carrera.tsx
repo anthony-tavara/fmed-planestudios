@@ -1,12 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import "../App.css";
-import { obtenerCarreraPorId } from "../lib/carreras/obtenerCarreraPorId";
+import {
+  obtenerCarreraPorId,
+  separarCarreraEnCiclos,
+} from "../lib/carreras/carreras";
 import {
   calcularEstadoMateria,
+  obtenerCorrelativas,
   obtenerMateriaPorCarreraYId,
   type EstadoMateria,
-} from "../lib/materias/calcularEstadoMateria";
-import type { Materia } from "../data/carreras/types";
+} from "../lib/materias/materias";
+import type { Carrera, Materia } from "../data/carreras/types";
 import {
   Lock,
   CircleDashed,
@@ -57,6 +61,25 @@ function labelCiclo(ciclo: number) {
   return `${ciclo}° año`;
 }
 
+function marcarCorrelativasDeMateria(
+  carrera: Carrera,
+  materia: Materia,
+  aprobadasId: Set<string>,
+  setMateriasIdResaltadas: Dispatch<SetStateAction<string[]>>,
+) {
+  if (!carrera) return;
+
+  const correlativas: Materia[] = [];
+  const nuevasResaltadas: string[] = [];
+  obtenerCorrelativas(carrera, materia, correlativas);
+
+  for (const correlativa of correlativas) {
+    if (calcularEstadoMateria(carrera, correlativa, aprobadasId) !== "aprobada")
+      nuevasResaltadas.push(correlativa.id);
+  }
+  setMateriasIdResaltadas(nuevasResaltadas);
+}
+
 export default function SelectorDeCarrera() {
   const { carreraId } = useParams();
   const carrera = carreraId ? obtenerCarreraPorId(carreraId) : undefined;
@@ -93,31 +116,9 @@ export default function SelectorDeCarrera() {
   );
   const [modoMapa, setModoMapa] = useState(false);
 
-  function marcarCorrelativasDeMateria(materia: Materia) {
-    if (!carrera) return;
-
-    const correlativas: string[] = materia.correlativas;
-    const nuevasResaltadas: string[] = [];
-
-    for (const correlativaId of correlativas) {
-      const correlativaInfo = obtenerMateriaPorCarreraYId(
-        carrera,
-        correlativaId,
-      );
-
-      if (
-        correlativaInfo &&
-        calcularEstadoMateria(correlativaInfo, aprobadas) !== "aprobada"
-      )
-        nuevasResaltadas.push(correlativaId);
-    }
-
-    setMateriasIdResaltadas(nuevasResaltadas);
-  }
-
   function toggleAprobada(materia: Materia) {
     setAprobadas((prev) => {
-      const estado = calcularEstadoMateria(materia, prev);
+      const estado = calcularEstadoMateria(carrera, materia, prev);
       if (estado === "bloqueada") return prev;
 
       const nuevoSet = new Set(prev);
@@ -128,22 +129,7 @@ export default function SelectorDeCarrera() {
     });
   }
 
-  const ciclos: Ciclo[] = [];
-
-  if (carrera) {
-    for (const materia of carrera.materias) {
-      let ciclo = ciclos.find((ciclo) => ciclo.numeroCiclo === materia.ciclo);
-
-      if (!ciclo) {
-        ciclo = { numeroCiclo: materia.ciclo, materias: [] };
-        ciclos.push(ciclo);
-      }
-
-      ciclo.materias.push(materia);
-    }
-
-    ciclos.sort((a, b) => a.numeroCiclo - b.numeroCiclo);
-  }
+  const ciclos: Ciclo[] = separarCarreraEnCiclos(carrera);
 
   return (
     <div className="min-h-screen bg-[#EDE8DD] font-body text-[#1B2A4A]">
@@ -167,7 +153,11 @@ export default function SelectorDeCarrera() {
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {materias.map((materia) => {
-                  const estado = calcularEstadoMateria(materia, aprobadas);
+                  const estado = calcularEstadoMateria(
+                    carrera,
+                    materia,
+                    aprobadas,
+                  );
                   const config = ESTADO_CONFIG[estado];
                   const Icon = config.icon;
 
@@ -176,7 +166,12 @@ export default function SelectorDeCarrera() {
                       key={materia.id}
                       onClick={() => {
                         toggleAprobada(materia);
-                        marcarCorrelativasDeMateria(materia);
+                        marcarCorrelativasDeMateria(
+                          carrera,
+                          materia,
+                          aprobadas,
+                          setMateriasIdResaltadas,
+                        );
                       }}
                       className={`group relative rounded-sm border p-4 text-left transition-all duration-150 ${config.card} cursor-pointer ${
                         materiasIdResaltadas.some(
